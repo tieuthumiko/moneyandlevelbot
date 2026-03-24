@@ -1,4 +1,5 @@
-const { Client, GatewayIntentBits, PermissionsBitField } = require("discord.js");
+require('dotenv').config();
+const { Client, GatewayIntentBits, PermissionsBitField, EmbedBuilder } = require("discord.js");
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
@@ -11,10 +12,10 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", UserSchema);
 
-const BOT_TOKEN = "YOUR_BOT_TOKEN"; 
-const MONGO_URI = "YOUR_MONGO_URI"; 
-const OWNER_ID = "YOUR_DISCORD_ID"; 
-const PREFIX = "mi!";
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const MONGO_URI = process.env.MONGO_URI;
+const OWNER_ID = process.env.OWNER_ID;
+const PREFIX = process.env.PREFIX || "mi!";
 
 const client = new Client({
     intents: [
@@ -104,42 +105,9 @@ client.on("messageCreate", async (message) => {
         message.channel.send(`${message.author} đang ở level **${data.level}** với **${data.xp} XP**.`);
     }
 
-    if (cmd === "leaderboard") {
-        const leaderboard = await User.find({ guild: message.guild.id }).sort({ level: -1, xp: -1 }).limit(10);
-        let text = "🏆 **Leaderboard của server** 🏆\n\n";
-        leaderboard.forEach((u, i) => {
-            text += `**${i+1}.** <@${u.user}> - Level **${u.level}** (${u.xp} XP) - **${u.money} micoin** (${getMoneyTier(u.money)})\n`;
-        });
-        message.channel.send(text);
-    }
-
     if (cmd === "money") {
         message.channel.send(`${message.author} hiện có **${data.money} micoin** 💰 (${getMoneyTier(data.money)})`);
     }
-
-if (cmd === "profile") {
-    let target = message.mentions.users.first() || message.author;
-    let dataUser = await User.findOne({ user: target.id, guild: message.guild.id });
-    if (!dataUser) dataUser = await User.create({ user: target.id, guild: message.guild.id });
-
-    let displayLevel = target.id === OWNER_ID ? "?" : dataUser.level;
-    let displayMoney = target.id === OWNER_ID ? "?" : dataUser.money;
-    let displayTier = target.id === OWNER_ID ? "? Tier" : getMoneyTier(dataUser.money);
-
-    const { EmbedBuilder } = require("discord.js");
-    const embed = new EmbedBuilder()
-        .setTitle(`${target.username} | Profile`)
-        .setColor("Blue")
-        .addFields(
-            { name: "Level", value: `${displayLevel}`, inline: true },
-            { name: "Micoin", value: `${displayMoney} (${displayTier})`, inline: true }
-        )
-        .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
-        .setFooter({ text: `Requested by ${message.author.username}` })
-        .setTimestamp();
-
-    message.channel.send({ embeds: [embed] });
-}
 
     if (cmd === "daily") {
         const now = Date.now();
@@ -175,7 +143,30 @@ if (cmd === "profile") {
         message.channel.send(`${message.author} đã trao **${amount} micoin** cho ${user} 💰 (${getMoneyTier(dataUser.money)})`);
     }
 
-   if (cmd === "givelv") {
+    if (cmd === "profile") {
+        let target = message.mentions.users.first() || message.author;
+        let dataUser = await User.findOne({ user: target.id, guild: message.guild.id });
+        if (!dataUser) dataUser = await User.create({ user: target.id, guild: message.guild.id });
+
+        let displayLevel = target.id === OWNER_ID ? "?" : dataUser.level;
+        let displayMoney = target.id === OWNER_ID ? "?" : dataUser.money;
+        let displayTier = target.id === OWNER_ID ? "Miko Tier" : getMoneyTier(dataUser.money);
+
+        const embed = new EmbedBuilder()
+            .setTitle(`${target.username} | Profile`)
+            .setColor("Blue")
+            .addFields(
+                { name: "Level", value: `${displayLevel}`, inline: true },
+                { name: "Micoin", value: `${displayMoney} (${displayTier})`, inline: true }
+            )
+            .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
+            .setFooter({ text: `Requested by ${message.author.username}` })
+            .setTimestamp();
+
+        message.channel.send({ embeds: [embed] });
+    }
+
+    if (cmd === "givelv") {
         if (message.author.id !== OWNER_ID) return message.reply("Chỉ owner bot mới dùng được lệnh này!");
         const user = message.mentions.users.first();
         const amount = parseInt(args[2]);
