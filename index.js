@@ -26,12 +26,11 @@ const client = new Client({
     ]
 });
 
-mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log("MongoDB connected!")).catch(console.error);
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("MongoDB connected!"))
+    .catch(console.error);
 
-client.once("ready", () => console.log(`Logged in as ${client.user.tag}`));
+client.once("clientReady", () => console.log(`Logged in as ${client.user.tag}`));
 
 const cooldowns = new Map();
 function canGain(key) {
