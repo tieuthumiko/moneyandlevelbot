@@ -105,6 +105,8 @@ function getMoneyTier(amount) {
 
 async function getGlobal(id){
 
+id=String(id);
+
 let data=
 await Global.findOne({
 user:id
@@ -114,39 +116,10 @@ if(!data){
 
 data=
 await Global.create({
-user:id,
-money:0,
-micash:0,
-lastDaily:0
+user:id
 });
 
 }
-
-let changed=false;
-
-if(data.money==null){
-
-data.money=0;
-changed=true;
-
-}
-
-if(data.micash==null){
-
-data.micash=0;
-changed=true;
-
-}
-
-if(data.lastDaily==null){
-
-data.lastDaily=0;
-changed=true;
-
-}
-
-if(changed)
-await data.save();
 
 return data;
 
@@ -177,15 +150,7 @@ guild:message.guild.id
 });
 
 let globalData =
-await getGlobal({
-user:message.author.id
-});
-
-if(!globalData)
-globalData =
-await Global.create({
-user:message.author.id
-});
+await getGlobal(message.author.id);
 
 levelData.xp += getXP();
 
@@ -279,9 +244,7 @@ message.channel.send(
     if(cmd==="money"){
 
 let globalData =
-await getGlobal({
-user:message.author.id
-});
+await getGlobal(message.author.id);
 
 if(!globalData)
 globalData=
@@ -298,9 +261,7 @@ message.channel.send(
     if(cmd==="daily"){
 
 let globalData =
-await getGlobal({
-user:message.author.id
-});
+await getGlobal(message.author.id);
 
 if(!globalData)
 globalData=
@@ -380,9 +341,7 @@ return message.channel.send(
 if(type==="money"){
 
 let globalData=
-await getGlobal({
-user:user.id
-});
+await getGlobal(message.author.id);
 
 if(!globalData)
 globalData=
@@ -403,9 +362,7 @@ return message.channel.send(
 if(type==="cash"){
 
 let globalData=
-await getGlobal({
-user:user.id
-});
+await getGlobal(message.author.id);
 
 if(!globalData)
 globalData=
@@ -427,14 +384,10 @@ return message.channel.send(
 
 
 let sender=
-await getGlobal({
-user:message.author.id
-});
+await getGlobal(message.author.id);
 
 let receiver=
-await getGlobal({
-user:user.id
-});
+await getGlobal(message.author.id);
 
 if(!sender)
 sender=
@@ -554,17 +507,17 @@ target.id===OWNER_ID?
 let displayMoney=
 target.id===OWNER_ID?
 "?":
-levelData.money;
+globalData.money;
 
 let displayCash=
 target.id===OWNER_ID?
 "?":
-levelData.micash;
+globalData.micash;
 
 let displayTier=
 target.id===OWNER_ID?
 "Miko":
-getMoneyTier(globalData.money);
+getMoneyTier(globalData.money || 0);
 
 const embed=
 new EmbedBuilder()
@@ -695,9 +648,7 @@ bet=args[1];
 }
 
 let globalData=
-await getGlobal({
-user:message.author.id
-});
+await getGlobal(message.author.id);
 
 if(!globalData)
 globalData=
