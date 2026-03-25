@@ -86,6 +86,10 @@ function canGain(key) {
         if (now < expirationTime) return false;
     }
     cooldowns.set(key, now);
+
+setTimeout(()=>{
+cooldowns.delete(key);
+},cooldownAmount);
     return true;
 }
 
@@ -218,29 +222,7 @@ return;
     const args = message.content.slice(PREFIX.length).trim().split(/\s+/);
     const cmd = args[0].toLowerCase();
 
-    let levelData=
-await Level.findOne({
-user:target.id,
-guild:message.guild.id
-});
 
-if(!levelData)
-levelData=
-await Level.create({
-user:target.id,
-guild:message.guild.id
-});
-
-let globalData=
-await Global.findOne({
-user:target.id
-});
-
-if(!globalData)
-globalData=
-await Global.create({
-user:target.id
-});
     if (cmd === "level") {
 
 let levelData =
@@ -516,36 +498,31 @@ await Global.create({
 user:target.id
 });
 
-if(!dataUser)
-dataUser=
-await User.create({
-user:target.id,
-guild:message.guild.id
-});
+
 
 let displayLevel=
 target.id===OWNER_ID?
-"∞":
-dataUser.level;
+"?":
+levelData.level;
 
 let displayXP=
 target.id===OWNER_ID?
-"∞":
-`${dataUser.xp}/${dataUser.level*100}`;
+"?":
+`${levelData.xp}/${levelData.level*100}`;
 
 let displayMoney=
 target.id===OWNER_ID?
-"∞":
-dataUser.money;
+"?":
+levelData.money;
 
 let displayCash=
 target.id===OWNER_ID?
-"∞":
-dataUser.micash;
+"?":
+levelData.micash;
 
 let displayTier=
 target.id===OWNER_ID?
-"God Tier":
+"Miko":
 getMoneyTier(dataUser.money);
 
 const embed=
@@ -632,7 +609,7 @@ guild:message.guild.id
 
 levelData.level+=amount;
 
-        if (dataUser.level >= 100) {
+        if (levelData.level >= 100) {
             let role = message.guild.roles.cache.find(r => r.name === "Level 100 VIP");
             if (!role) {
                 role = await message.guild.roles.create({
@@ -907,7 +884,7 @@ if(amount>200000)
 amount=200000;
 
 if(globalData.money<amount)
-return;
+return message.reply("Không đủ tiền");
 
 globalData.money-=amount;
 
@@ -954,7 +931,10 @@ let amount=
 parseInt(args[2]);
 
 if(!color||!amount)
-return;
+return message.reply("mi!roulette red/black/green amount");
+
+if(!["red","black","green"].includes(color))
+return message.reply("Chọn red / black / green");
 
 let globalData=
 await getGlobal(message.author.id);
