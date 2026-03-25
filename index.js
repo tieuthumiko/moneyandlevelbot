@@ -492,11 +492,22 @@ await Global.findOne({
 user:target.id
 });
 
-if(!globalData)
+if(!globalData){
+
 globalData=
 await Global.create({
 user:target.id
 });
+
+}
+
+if(globalData.money===undefined)
+globalData.money=0;
+
+if(globalData.micash===undefined)
+globalData.micash=0;
+
+await globalData.save();
 
 
 
