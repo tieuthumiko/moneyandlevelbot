@@ -106,7 +106,7 @@ function getMoneyTier(amount) {
 async function getGlobal(id){
 
 let data=
-await Global.findOne({
+await getGlobal({
 user:id
 });
 
@@ -145,7 +145,7 @@ guild:message.guild.id
 });
 
 let globalData =
-await Global.findOne({
+await getGlobal({
 user:message.author.id
 });
 
@@ -247,7 +247,7 @@ message.channel.send(
     if(cmd==="money"){
 
 let globalData =
-await Global.findOne({
+await getGlobal({
 user:message.author.id
 });
 
@@ -266,7 +266,7 @@ message.channel.send(
     if(cmd==="daily"){
 
 let globalData =
-await Global.findOne({
+await getGlobal({
 user:message.author.id
 });
 
@@ -348,7 +348,7 @@ return message.channel.send(
 if(type==="money"){
 
 let globalData=
-await Global.findOne({
+await getGlobal({
 user:user.id
 });
 
@@ -371,7 +371,7 @@ return message.channel.send(
 if(type==="cash"){
 
 let globalData=
-await Global.findOne({
+await getGlobal({
 user:user.id
 });
 
@@ -395,12 +395,12 @@ return message.channel.send(
 
 
 let sender=
-await Global.findOne({
+await getGlobal({
 user:message.author.id
 });
 
 let receiver=
-await Global.findOne({
+await getGlobal({
 user:user.id
 });
 
@@ -488,9 +488,7 @@ guild:message.guild.id
 });
 
 let globalData=
-await Global.findOne({
-user:target.id
-});
+await getGlobal(target.id);
 
 if(!globalData){
 
@@ -665,7 +663,7 @@ bet=args[1];
 }
 
 let globalData=
-await Global.findOne({
+await getGlobal({
 user:message.author.id
 });
 
