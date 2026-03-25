@@ -106,15 +106,39 @@ function getMoneyTier(amount) {
 async function getGlobal(id){
 
 let data=
-await getGlobal({
+await Global.findOne({
 user:id
-});
+}).lean();
 
-if(!data)
+if(!data){
+
 data=
 await Global.create({
 user:id
 });
+
+return data;
+
+}
+
+if(data.money==null || data.micash==null){
+
+await Global.updateOne(
+{user:id},
+{
+$set:{
+money:data.money||0,
+micash:data.micash||0
+}
+}
+);
+
+data=
+await Global.findOne({
+user:id
+});
+
+}
 
 return data;
 
