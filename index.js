@@ -108,37 +108,45 @@ async function getGlobal(id){
 let data=
 await Global.findOne({
 user:id
-}).lean();
+});
 
 if(!data){
 
 data=
 await Global.create({
-user:id
-});
-
-return data;
-
-}
-
-if(data.money==null || data.micash==null){
-
-await Global.updateOne(
-{user:id},
-{
-$set:{
-money:data.money||0,
-micash:data.micash||0
-}
-}
-);
-
-data=
-await Global.findOne({
-user:id
+user:id,
+money:0,
+micash:0,
+lastDaily:0
 });
 
 }
+
+let changed=false;
+
+if(data.money==null){
+
+data.money=0;
+changed=true;
+
+}
+
+if(data.micash==null){
+
+data.micash=0;
+changed=true;
+
+}
+
+if(data.lastDaily==null){
+
+data.lastDaily=0;
+changed=true;
+
+}
+
+if(changed)
+await data.save();
 
 return data;
 
