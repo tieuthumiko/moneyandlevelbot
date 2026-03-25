@@ -400,7 +400,7 @@ return message.channel.send(
 if(type==="cash"){
 
 let globalData=
-await getGlobal(message.author.id);
+await getGlobal(user.id);
 
 if(!globalData)
 globalData=
@@ -686,7 +686,7 @@ bet=args[1];
 }
 
 let globalData=
-await getGlobal(message.author.id);
+await getGlobal(user.id);
 
 if(!globalData)
 globalData=
