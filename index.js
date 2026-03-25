@@ -234,8 +234,21 @@ return;
 
 }
 
-    const args = message.content.slice(PREFIX.length).trim().split(/\s+/);
-    const cmd = args[0].toLowerCase();
+    const content =
+message.content.toLowerCase();
+
+if(!content.startsWith(
+PREFIX.toLowerCase()
+)) return;
+
+const args =
+content
+.slice(PREFIX.length)
+.trim()
+.split(/\s+/);
+
+const cmd =
+args[0];
 
 
     if (cmd === "level") {
