@@ -119,6 +119,8 @@ return data;
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
+    if(!message.guild) return;
+
     const key = message.author.id + message.guild.id;
 
     if (!message.content.startsWith(PREFIX)) {
@@ -216,12 +218,49 @@ return;
     const args = message.content.slice(PREFIX.length).trim().split(/\s+/);
     const cmd = args[0].toLowerCase();
 
-    let data = await User.findOne({ user: message.author.id, guild: message.guild.id });
-    if (!data) data = await User.create({ user: message.author.id, guild: message.guild.id });
+    let levelData=
+await Level.findOne({
+user:target.id,
+guild:message.guild.id
+});
 
+if(!levelData)
+levelData=
+await Level.create({
+user:target.id,
+guild:message.guild.id
+});
+
+let globalData=
+await Global.findOne({
+user:target.id
+});
+
+if(!globalData)
+globalData=
+await Global.create({
+user:target.id
+});
     if (cmd === "level") {
-        message.channel.send(`${message.author} đang ở level **${data.level}** với **${data.xp} XP**.`);
-    }
+
+let levelData =
+await Level.findOne({
+user:message.author.id,
+guild:message.guild.id
+});
+
+if(!levelData)
+levelData =
+await Level.create({
+user:message.author.id,
+guild:message.guild.id
+});
+
+message.channel.send(
+`${message.author} đang ở level **${levelData.level}** với **${levelData.xp} XP**.`
+);
+
+}
 
     if(cmd==="money"){
 
@@ -459,8 +498,21 @@ user:target.id,
 guild:message.guild.id
 });
 
+if(!levelData)
+levelData=
+await Level.create({
+user:target.id,
+guild:message.guild.id
+});
+
 let globalData=
 await Global.findOne({
+user:target.id
+});
+
+if(!globalData)
+globalData=
+await Global.create({
 user:target.id
 });
 
@@ -570,9 +622,15 @@ await Level.findOne({
 user:user.id,
 guild:message.guild.id
 });
-        if (!dataUser) dataUser = await User.create({ user: user.id, guild: message.guild.id });
 
-        dataUser.level += amount;
+if(!levelData)
+levelData=
+await Level.create({
+user:user.id,
+guild:message.guild.id
+});
+
+levelData.level+=amount;
 
         if (dataUser.level >= 100) {
             let role = message.guild.roles.cache.find(r => r.name === "Level 100 VIP");
@@ -589,8 +647,11 @@ guild:message.guild.id
             }
         }
 
-        await dataUser.save();
-        message.channel.send(`${user} đã được cộng **${amount} level**! Hiện tại level: ${dataUser.level}`);
+        await levelData.save();
+
+message.channel.send(
+`${user} đã được cộng **${amount} level**! Hiện tại level: ${levelData.level}`
+);
     }
 
 if(cmd==="cf"){
@@ -725,6 +786,9 @@ await globalData.save();
 
 if(cmd==="exchange"){
 
+let globalData=
+await getGlobal(message.author.id);
+
 let amount=parseInt(args[1]);
 
 if(isNaN(amount)||amount<=0)
@@ -774,8 +838,8 @@ amount=parseInt(bet);
 
 }
 
-if(isNaN(amount)||amount<=0)
-return;
+if(isNaN(amount))
+return message.reply("mi!slots amount");
 
 if(amount>200000)
 amount=200000;
@@ -837,7 +901,7 @@ let globalData=
 await getGlobal(message.author.id);
 
 if(isNaN(amount))
-return;
+return message.reply("mi!dice amount");
 
 if(amount>200000)
 amount=200000;
