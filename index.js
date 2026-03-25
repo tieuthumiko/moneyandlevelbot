@@ -523,7 +523,7 @@ levelData.micash;
 let displayTier=
 target.id===OWNER_ID?
 "Miko":
-getMoneyTier(dataUser.money);
+getMoneyTier(globalData.money);
 
 const embed=
 new EmbedBuilder()
