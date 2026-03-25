@@ -864,21 +864,38 @@ ${win>0?
 
 if(cmd==="dice"){
 
-let amount=parseInt(args[1]);
+let bet=args[1];
 
 let globalData=
 await getGlobal(message.author.id);
 
-if(isNaN(amount))
+let amount;
+
+if(bet==="all"){
+
+amount=
+Math.min(globalData.money,200000);
+
+}else{
+
+amount=parseInt(bet);
+
+}
+
+if(isNaN(amount)||amount<=0)
 return message.reply("mi!dice amount");
 
 if(amount>200000)
 amount=200000;
 
+if(message.author.id!==OWNER_ID){
+
 if(globalData.money<amount)
 return message.reply("Không đủ tiền");
 
 globalData.money-=amount;
+
+}
 
 let player=
 Math.floor(Math.random()*6)+1;
