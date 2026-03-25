@@ -136,6 +136,24 @@ client.on("messageCreate", async (message) => {
 
 if (!canGain(key)) return;
 
+let content =
+message.content.toLowerCase();
+
+if(!content.startsWith(
+PREFIX.toLowerCase()
+)) return;
+
+const args =
+content
+.slice(
+PREFIX.length
+)
+.trim()
+.split(/\s+/);
+
+const cmd =
+args.shift();
+
 let levelData =
 await Level.findOne({
 user:message.author.id,
