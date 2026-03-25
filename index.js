@@ -132,7 +132,7 @@ client.on("messageCreate", async (message) => {
 
     const key = message.author.id + message.guild.id;
 
-    if (!message.content.startsWith(PREFIX)) {
+    if (!message.content.toLowerCase().startsWith(PREFIX.toLowerCase())) {
 
 if (!canGain(key)) return;
 
@@ -379,7 +379,7 @@ return message.channel.send(
 if(type==="money"){
 
 let globalData=
-await getGlobal(message.author.id);
+await getGlobal(user.id); 
 
 if(!globalData)
 globalData=
@@ -686,7 +686,7 @@ bet=args[1];
 }
 
 let globalData=
-await getGlobal(user.id);
+await getGlobal(message.author.id);
 
 if(!globalData)
 globalData=
@@ -990,7 +990,7 @@ if(amount>200000)
 amount=200000;
 
 if(globalData.money<amount)
-return;
+return message.reply("Không đủ tiền");
 
 globalData.money-=amount;
 
