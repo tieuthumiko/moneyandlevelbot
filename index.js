@@ -346,7 +346,7 @@ let amount=parseInt(args[3]);
 
 if(!user||!type||isNaN(amount))
 return message.reply(
-"mi!give @user money/cash/level amount"
+"mi!give @user money/cash amount"
 );
 
 if(message.author.id===OWNER_ID){
