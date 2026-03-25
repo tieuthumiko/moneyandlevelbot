@@ -335,6 +335,13 @@ let user=
 message.mentions.users.first();
 
 let type=args[2];
+type=type.toLowerCase();
+
+if(["coin","coins","micoin"].includes(type))
+type="money";
+
+if(["cash","micash","gem"].includes(type))
+type="cash";
 let amount=parseInt(args[3]);
 
 if(!user||!type||isNaN(amount))
@@ -418,7 +425,7 @@ let sender=
 await getGlobal(message.author.id);
 
 let receiver=
-await getGlobal(message.author.id);
+await getGlobal(user.id);
 
 if(!sender)
 sender=
