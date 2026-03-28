@@ -28,6 +28,16 @@ type:Number,
 default:0
 },
 
+inventory:{
+type:Array,
+default:[]
+},
+
+married:{
+type:String,
+default:null
+},
+
 lastDaily:{
 type:Number,
 default:0
@@ -136,43 +146,25 @@ client.on("messageCreate", async (message) => {
 
 if (!canGain(key)) return;
 
-let content =
-message.content.toLowerCase();
-
-if(!content.startsWith(
-PREFIX.toLowerCase()
-)) return;
-
-const args =
-content
-.slice(
-PREFIX.length
-)
-.trim()
-.split(/\s+/);
-
-const cmd =
-args.shift();
-
-let levelData =
+let levelData=
 await Level.findOne({
 user:message.author.id,
 guild:message.guild.id
 });
 
 if(!levelData)
-levelData =
+levelData=
 await Level.create({
 user:message.author.id,
 guild:message.guild.id
 });
 
-let globalData =
+let globalData=
 await getGlobal(message.author.id);
 
-levelData.xp += getXP();
+levelData.xp+=getXP();
 
-globalData.money += getMicoin();
+globalData.money+=getMicoin();
 
 let xpNeeded =
 levelData.level*100;
@@ -247,6 +239,25 @@ content
 .trim()
 .split(/\s+/);
 
+const shop={
+
+ring1:{
+name:"Silver Ring",
+price:5
+},
+
+ring2:{
+name:"Golden Ring",
+price:15
+},
+
+ring3:{
+name:"Diamond Ring",
+price:50
+}
+
+};
+
 const cmd =
 args[0];
 
@@ -272,7 +283,7 @@ message.channel.send(
 
 }
 
-    if(cmd==="money"){
+    if(cmd==="coin"){
 
 let globalData =
 await getGlobal(message.author.id);
@@ -286,6 +297,225 @@ user:message.author.id
 message.channel.send(
 `${message.author} hiện có **${globalData.money} micoin** 💰 (${getMoneyTier(globalData.money)})`
 );
+
+}
+
+if(cmd==="marry"){
+
+let user=
+message.mentions.users.first();
+
+let ring=args[2];
+
+if(!user||!ring)
+return;
+
+let sender=
+await getGlobal(
+message.author.id
+);
+
+let target=
+await getGlobal(
+user.id
+);
+
+if(!sender.inventory.includes(ring))
+return message.reply(
+"Bạn không có nhẫn"
+);
+
+if(sender.married)
+return message.reply(
+"Bạn đã kết hôn"
+);
+
+message.channel.send(
+`${user}
+
+${message.author} muốn marry bạn
+
+Gõ:
+mi!marry accept`
+);
+
+client.marryProposals=
+client.marryProposals||new Map();
+
+client.marryProposals.set(
+user.id,
+message.author.id
+);
+
+}
+
+if(cmd==="marry"&&args[1]==="accept"){
+
+let proposer=
+client.marryProposals?.get(
+message.author.id
+);
+
+if(!proposer)
+return;
+
+let sender=
+await getGlobal(proposer);
+
+let target=
+await getGlobal(
+message.author.id
+);
+
+sender.married=
+message.author.id;
+
+target.married=
+proposer;
+
+await sender.save();
+
+await target.save();
+
+client.marryProposals.delete(
+message.author.id
+);
+
+message.channel.send(
+"💍 Hai người đã kết hôn!"
+);
+
+}
+
+if(cmd==="divorce"){
+
+let globalData=
+await getGlobal(
+message.author.id
+);
+
+if(!globalData.married)
+return;
+
+let partner=
+globalData.married;
+
+message.channel.send(
+`Gửi yêu cầu divorce
+
+${partner}
+gõ:
+
+mi!divorce accept`
+);
+
+client.divorce=
+client.divorce||new Map();
+
+client.divorce.set(
+partner,
+message.author.id
+);
+
+}
+
+if(cmd==="divorce"&&args[1]==="accept"){
+
+let partner=
+client.divorce?.get(
+message.author.id
+);
+
+if(!partner)
+return;
+
+let sender=
+await getGlobal(partner);
+
+let target=
+await getGlobal(
+message.author.id
+);
+
+sender.married=null;
+
+target.married=null;
+
+await sender.save();
+
+await target.save();
+
+client.divorce.delete(
+message.author.id
+);
+
+message.channel.send(
+"💔 Đã ly hôn"
+);
+
+}
+
+if(cmd==="buy"){
+
+let id=args[1];
+
+if(!shop[id])
+return;
+
+let item=
+shop[id];
+
+let userId=
+message.author.id;
+
+let globalData=
+await getGlobal(userId);
+
+if(globalData.micash<item.price)
+return message.reply(
+"Không đủ micash"
+);
+
+await Global.updateOne(
+
+{user:userId},
+
+{
+$inc:{
+micash:-item.price
+},
+
+$push:{
+inventory:id
+}
+
+}
+
+);
+
+message.channel.send(
+`Đã mua ${item.name}`
+);
+
+}
+
+if(cmd==="shop"){
+
+let text="💎 Shop (micash only)\n\n";
+
+for(let id in shop){
+
+text+=`
+${id}
+${shop[id].name}
+
+Price: ${shop[id].price} cash
+
+`;
+
+}
+
+message.channel.send(text);
 
 }
 
@@ -348,6 +578,9 @@ if(!user||!type||isNaN(amount))
 return message.reply(
 "mi!give @user money/cash amount"
 );
+
+if(amount<=0)
+return message.reply("Amount phải > 0");
 
 if(message.author.id===OWNER_ID){
 
@@ -446,6 +679,9 @@ return message.reply(
 "Không đủ micoin!"
 );
 
+if(amount<=0)
+return message.reply("Amount phải > 0");
+
 sender.money-=amount;
 
 receiver.money+=amount;
@@ -458,6 +694,9 @@ if(amount>sender.micash)
 return message.reply(
 "Không đủ micash!"
 );
+
+if(amount<=0)
+return message.reply("Amount phải > 0");
 
 sender.micash-=amount;
 
@@ -557,6 +796,20 @@ target.id===OWNER_ID?
 "Miko":
 getMoneyTier(globalData.money || 0);
 
+let marriedText="Single";
+
+if(globalData.married){
+
+let user=
+await client.users.fetch(
+globalData.married
+);
+
+marriedText=
+`Married với ${user.username}`;
+
+}
+
 const embed=
 new EmbedBuilder()
 
@@ -604,6 +857,11 @@ inline:true
 name:"Micash 💎",
 value:`${displayCash}`,
 inline:true
+},
+
+{
+name:"Marriage 💍",
+value:marriedText
 }
 
 )
@@ -670,7 +928,7 @@ let bet;
 
 if(!args[1])
 return message.reply(
-"mi!cf amount"
+"mi!cf heads/tails amount"
 );
 
 if(args[1]==="heads"||args[1]==="tails"){
@@ -726,7 +984,10 @@ return message.reply(
 "Không đủ micoin!"
 );
 
-globalData.money-=amount;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:-bet}}
+);
 
 }
 
@@ -769,7 +1030,10 @@ choice===result;
 
 if(win){
 
-globalData.money+=amount*2;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:bet*2}}
+);
 
 await msg.edit(
 `🪙 Kết quả: **${result}**
@@ -793,32 +1057,67 @@ await globalData.save();
 
 if(cmd==="exchange"){
 
+let type=args[1];
+
+let amount=parseInt(args[2]);
+
+if(!type||isNaN(amount))
+return message.reply(
+"mi!exchange coin/cash amount"
+);
+
+let userId=
+message.author.id;
+
 let globalData=
-await getGlobal(message.author.id);
+await getGlobal(userId);
 
-let amount=parseInt(args[1]);
+if(type==="coin"){
 
-if(isNaN(amount)||amount<=0)
-return message.reply("mi!exchange amount");
-
-let cost=amount*1000000;
-
-if(message.author.id!==OWNER_ID){
+let cost=
+amount*1000000;
 
 if(globalData.money<cost)
-return message.reply("Không đủ micoin!");
+return message.reply(
+"Không đủ micoin"
+);
 
-globalData.money-=cost;
+await Global.updateOne(
+{user:userId},
+{
+$inc:{
+money:-cost,
+micash:amount
+}
+}
+);
+
+message.channel.send(
+`Đã đổi ${cost} coin → ${amount} cash 💎`
+);
 
 }
 
-globalData.micash+=amount;
+if(type==="cash"){
 
-await globalData.save();
+if(globalData.micash<amount)
+return;
+
+await Global.updateOne(
+{user:userId},
+{
+$inc:{
+micash:-amount,
+money:amount*800000
+}
+}
+);
 
 message.channel.send(
-`${message.author} đã đổi **${amount} micash 💎**`
+`Đã đổi ${amount} cash → ${amount*800000} coin 💰`
 );
+
+}
 
 }
 
@@ -829,8 +1128,11 @@ let bet=args[1];
 if(!bet)
 return message.reply("mi!slots amount");
 
+let userId=
+message.author.id;
+
 let globalData=
-await getGlobal(message.author.id);
+await getGlobal(userId);
 
 let amount;
 
@@ -841,20 +1143,21 @@ Math.min(globalData.money,200000);
 
 }else{
 
-amount=parseInt(bet);
+amount=
+parseInt(bet);
 
 }
 
-if(isNaN(amount))
-return message.reply("mi!slots amount");
-
-if(amount>200000)
-amount=200000;
+if(isNaN(amount)||amount<=0)
+return;
 
 if(globalData.money<amount)
 return message.reply("Không đủ tiền");
 
-globalData.money-=amount;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:-amount}}
+);
 
 let symbols=[
 "🍒",
@@ -864,14 +1167,41 @@ let symbols=[
 "🔔"
 ];
 
+let msg=
+await message.channel.send(
+"🎰 | ❓ | ❓ | ❓ |"
+);
+
+let interval=
+setInterval(()=>{
+
 let s1=
-symbols[Math.floor(Math.random()*symbols.length)];
+symbols[Math.floor(Math.random()*5)];
 
 let s2=
-symbols[Math.floor(Math.random()*symbols.length)];
+symbols[Math.floor(Math.random()*5)];
 
 let s3=
-symbols[Math.floor(Math.random()*symbols.length)];
+symbols[Math.floor(Math.random()*5)];
+
+msg.edit(
+`🎰 | ${s1} | ${s2} | ${s3} |`
+);
+
+},150);
+
+setTimeout(async()=>{
+
+clearInterval(interval);
+
+let s1=
+symbols[Math.floor(Math.random()*5)];
+
+let s2=
+symbols[Math.floor(Math.random()*5)];
+
+let s3=
+symbols[Math.floor(Math.random()*5)];
 
 let win=0;
 
@@ -885,18 +1215,25 @@ win=amount*2;
 
 }
 
-globalData.money+=win;
+if(win>0){
 
-await globalData.save();
+await Global.updateOne(
+{user:userId},
+{$inc:{money:win}}
+);
 
-message.channel.send(
+}
+
+msg.edit(
 `🎰 | ${s1} | ${s2} | ${s3} |
 
 ${win>0?
-`Thắng ${win} micoin`:
-`Thua ${amount} micoin`
+`Thắng ${win}`:
+`Thua ${amount}`
 }`
 );
+
+},2200);
 
 }
 
@@ -904,8 +1241,13 @@ if(cmd==="dice"){
 
 let bet=args[1];
 
+if(!bet)
+return message.reply("mi!dice amount");
+
+let userId=message.author.id;
+
 let globalData=
-await getGlobal(message.author.id);
+await getGlobal(userId);
 
 let amount;
 
@@ -921,19 +1263,44 @@ amount=parseInt(bet);
 }
 
 if(isNaN(amount)||amount<=0)
-return message.reply("mi!dice amount");
+return message.reply("Amount không hợp lệ");
 
 if(amount>200000)
 amount=200000;
 
-if(message.author.id!==OWNER_ID){
+
 
 if(globalData.money<amount)
 return message.reply("Không đủ tiền");
 
-globalData.money-=amount;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:-amount}}
+);
 
-}
+let msg=
+await message.channel.send(
+"🎲 Rolling..."
+);
+
+let interval=
+setInterval(()=>{
+
+let r1=
+Math.floor(Math.random()*6)+1;
+
+let r2=
+Math.floor(Math.random()*6)+1;
+
+msg.edit(
+`🎲 ${r1} vs ${r2}`
+);
+
+},200);
+
+setTimeout(async()=>{
+
+clearInterval(interval);
 
 let player=
 Math.floor(Math.random()*6)+1;
@@ -943,56 +1310,103 @@ Math.floor(Math.random()*6)+1;
 
 if(player>bot){
 
-globalData.money+=amount*2;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:amount*2}}
+);
 
-message.channel.send(
+msg.edit(
 `🎲 Bạn: ${player}
 🎲 Bot: ${bot}
 
-Bạn thắng ${amount}`
+Thắng ${amount}`
 );
 
 }else if(player===bot){
 
-globalData.money+=amount;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:amount}}
+);
 
-message.channel.send("Hòa");
+msg.edit(
+`🎲 ${player} vs ${bot}
+
+Hòa`
+);
 
 }else{
 
-message.channel.send(
-`Bạn thua ${amount}`
+msg.edit(
+`🎲 Bạn: ${player}
+🎲 Bot: ${bot}
+
+Thua ${amount}`
 );
 
 }
 
-await globalData.save();
+},2000);
 
 }
 
 if(cmd==="roulette"){
 
-let color=args[1];
+let color=
+args[1];
 
 let amount=
 parseInt(args[2]);
 
-if(!color||!amount)
-return message.reply("mi!roulette red/black/green amount");
+if(!color||isNaN(amount))
+return message.reply(
+"mi!roulette red/black/green amount"
+);
 
-if(!["red","black","green"].includes(color))
-return message.reply("Chọn red / black / green");
+if(amount<=0)
+return;
+
+let userId=
+message.author.id;
 
 let globalData=
-await getGlobal(message.author.id);
-
-if(amount>200000)
-amount=200000;
+await getGlobal(userId);
 
 if(globalData.money<amount)
 return message.reply("Không đủ tiền");
 
-globalData.money-=amount;
+await Global.updateOne(
+{user:userId},
+{$inc:{money:-amount}}
+);
+
+let msg=
+await message.channel.send(
+"🎡 Spinning..."
+);
+
+let spin=[
+"🔴 ⚫ 🟢",
+"⚫ 🟢 🔴",
+"🟢 🔴 ⚫"
+];
+
+let i=0;
+
+let interval=
+setInterval(()=>{
+
+msg.edit(
+`🎡 ${spin[i%3]}`
+);
+
+i++;
+
+},300);
+
+setTimeout(async()=>{
+
+clearInterval(interval);
 
 let colors=[
 "red",
@@ -1002,30 +1416,33 @@ let colors=[
 
 let result=
 colors[
-Math.floor(Math.random()*colors.length)
+Math.floor(Math.random()*3)
 ];
 
-let multi=0;
-
-if(result==="green")
-multi=14;
-
-else
-multi=2;
+let multi=
+result==="green"?
+14:
+2;
 
 if(color===result){
 
-globalData.money+=amount*multi;
+let win=
+amount*multi;
 
-message.channel.send(
+await Global.updateOne(
+{user:userId},
+{$inc:{money:win}}
+);
+
+msg.edit(
 `🎡 Result: ${result}
 
-Thắng ${amount*multi}`
+Thắng ${win}`
 );
 
 }else{
 
-message.channel.send(
+msg.edit(
 `🎡 Result: ${result}
 
 Thua ${amount}`
@@ -1033,7 +1450,7 @@ Thua ${amount}`
 
 }
 
-await globalData.save();
+},2500);
 
 }
 
@@ -1104,3 +1521,11 @@ embeds:[embed]
 });
 
 client.login(BOT_TOKEN);
+
+process.on("unhandledRejection",err=>{
+console.log("Unhandled Rejection:",err);
+});
+
+process.on("uncaughtException",err=>{
+console.log("Uncaught Exception:",err);
+});
