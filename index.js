@@ -5,7 +5,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Bot is running! :3');
+  res.status(200).send('Bot is running! :3');
+});
+
+app.get("/ping",(req,res)=>{
+
+res.send("miko is so cute :33");
+
 });
 
 app.listen(PORT, () => {
