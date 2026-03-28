@@ -4,8 +4,8 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/ping', (req, res) => {
-  res.status(200).send('miko is so cutee :33');
+app.get('/meomeocte', (req, res) => {
+  res.status(200).send('miko iu meoo :3');
 });
 
 
@@ -18,7 +18,7 @@ const https=require("https");
 function ping(){
 
 https.get(
-"https://moneyandlevelbot.onrender.com/ping",
+"https://moneyandlevelbot.onrender.com/meomeocte",
 (res)=>{
 
 console.log(
