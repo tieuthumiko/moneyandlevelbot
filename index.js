@@ -4,7 +4,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
+app.get('/ping', (req, res) => {
   res.status(200).send('miko is so cutee :33');
 });
 
@@ -12,15 +12,35 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
+
 const https=require("https");
 
-setInterval(()=>{
+function ping(){
 
 https.get(
-"https://moneyandlevelbot.onrender.com"
+"https://moneyandlevelbot.onrender.com",
+(res)=>{
+
+console.log(
+"Self ping:",
+res.statusCode
 );
 
-},300000);
+}
+).on("error",(err)=>{
+
+console.log(
+"Ping failed:",
+err.message
+);
+
+});
+
+}
+
+ping();
+
+setInterval(ping,300000);
 
 const { Client, GatewayIntentBits, PermissionsBitField, EmbedBuilder } = require("discord.js");
 const mongoose = require("mongoose");
