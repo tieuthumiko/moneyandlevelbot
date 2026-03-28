@@ -499,23 +499,119 @@ message.channel.send(
 
 }
 
-if(cmd==="shop"){
+if(["shop","sh"].includes(cmd)){
 
-let text="💎 Shop (micash only)\n\n";
+const embed=
+new EmbedBuilder()
+
+.setColor("#ff7ad9")
+
+.setTitle("💎 Miko Shop")
+
+.setDescription(
+"Chỉ dùng **micash** để mua"
+);
 
 for(let id in shop){
 
-text+=`
-${id}
-${shop[id].name}
+let item=shop[id];
 
-Price: ${shop[id].price} cash
+embed.addFields({
 
-`;
+name:`${item.emoji} ${item.name}`,
+
+value:
+`ID: ${id}
+
+Price: ${item.price} 💎
+
+${item.desc}`,
+
+inline:true
+
+});
 
 }
 
-message.channel.send(text);
+embed.setFooter({
+
+text:"Use mi!buy itemID"
+
+});
+
+embed.setTimestamp();
+
+message.channel.send({
+
+embeds:[embed]
+
+});
+
+}
+
+if(["inventory","inv","bag"].includes(cmd)){
+
+let globalData=
+await getGlobal(message.author.id);
+
+if(!globalData.inventory.length)
+return message.reply(
+"Inventory trống"
+);
+
+const embed=
+new EmbedBuilder()
+
+.setColor("#ff7ad9")
+
+.setTitle(
+`${message.author.username} Inventory 🎒`
+);
+
+let items={};
+
+for(let id of globalData.inventory){
+
+if(!items[id])
+items[id]=0;
+
+items[id]++;
+
+}
+
+for(let id in items){
+
+let item=shop[id];
+
+if(!item) continue;
+
+embed.addFields({
+
+name:
+`${item.emoji} ${item.name}`,
+
+value:
+`Amount: ${items[id]}
+
+ID: ${id}`,
+
+inline:true
+
+});
+
+}
+
+embed.setFooter({
+
+text:"Use mi!shop"
+
+});
+
+message.channel.send({
+
+embeds:[embed]
+
+});
 
 }
 
@@ -1500,7 +1596,14 @@ inline:true
 {
 name:"💎 Currency",
 value:
-"`mi!exchange`\n(1 micash = 1M micoin)",
+"`mi!exchange`\n(1M micoin = 1 micash) \n(1 micash = 800K micoin)",
+inline:true
+},
+
+{
+name:"💍 Marry/Divorce",
+value:
+"`mi!marry`\n`mi!divorce`",
 inline:true
 }
 
