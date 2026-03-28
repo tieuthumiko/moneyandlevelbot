@@ -325,20 +325,33 @@ message.channel.send(
 
 }
 
-    if(cmd==="coin"){
+if(cmd==="cash"||cmd==="money"||cmd==="coin"){
 
-let globalData =
-await getGlobal(message.author.id);
+let userId=
+message.author.id;
 
-if(!globalData)
-globalData=
-await Global.create({
-user:message.author.id
+let data=
+await getGlobal(userId);
+
+const embed={
+
+title:"Wallet",
+
+description:
+"💵 Cash: "+
+data.money+
+"\n🪙 Coin: "+
+data.coin,
+
+color:0xf592b3
+
+};
+
+message.channel.send({
+
+embeds:[embed]
+
 });
-
-message.channel.send(
-`${message.author} hiện có **${globalData.money} micoin** 💰 (${getMoneyTier(globalData.money)})`
-);
 
 }
 
@@ -577,7 +590,7 @@ inline:true
 
 embed.setFooter({
 
-text:"Use mi!buy itemID"
+text:"Dùng lệnh mi!buy itemID để mua"
 
 });
 
@@ -645,7 +658,7 @@ inline:true
 
 embed.setFooter({
 
-text:"Use mi!shop"
+text:"Dùng lệnh mi!shop để xem ring"
 
 });
 
@@ -681,7 +694,7 @@ Math.floor((cd-diff)/3600000);
 
 return message.reply(
 
-"Come back in "+
+"Có thể dùng lại lệnh sau "+
 time+
 "h"
 
@@ -719,7 +732,7 @@ const embed={
 title:"Daily reward",
 
 description:
-"You got "+
+"Bạn đã nhận "+
 reward+
 " coins",
 
