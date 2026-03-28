@@ -1035,6 +1035,9 @@ message.channel.send(
 
 if(cmd==="cf"){
 
+    let userId=
+message.author.id;
+
 let choice="heads";
 let bet;
 
