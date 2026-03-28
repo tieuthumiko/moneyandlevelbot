@@ -1595,7 +1595,7 @@ if(cmd==="help"){
 const embed=
 new EmbedBuilder()
 
-.setColor("#347bff")
+.setColor("#ed95ff")
 
 .setTitle("Miko's Bot Commands")
 
