@@ -18,7 +18,7 @@ const https=require("https");
 function ping(){
 
 https.get(
-"https://moneyandlevelbot.onrender.com/meomeocte",
+"https://meomeosiuctenee.onrender.com/meomeocte",
 (res)=>{
 
 console.log(
