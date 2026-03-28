@@ -72,6 +72,11 @@ default:null
 lastDaily:{
 type:Number,
 default:0
+},
+
+dailyLast:{
+type:Number,
+default:0
 }
 
 });
@@ -652,43 +657,81 @@ embeds:[embed]
 
 }
 
-    if(cmd==="daily"){
+if(cmd==="daily"){
 
-let globalData =
-await getGlobal(message.author.id);
+let userId=
+message.author.id;
 
-if(!globalData)
-globalData=
-await Global.create({
-user:message.author.id
-});
+let data=
+await getGlobal(userId);
 
-const now=Date.now();
+let now=Date.now();
 
-if(now-globalData.lastDaily<86400000){
+let cd=86400000;
 
-let remain=
-Math.ceil(
-(86400000-(now-globalData.lastDaily))/3600000
-);
+if(data.dailyLast){
+
+let diff=
+now-data.dailyLast;
+
+if(diff<cd){
+
+let time=
+Math.floor((cd-diff)/3600000);
 
 return message.reply(
-`Chờ ${remain} giờ nữa`
+
+"Come back in "+
+time+
+"h"
+
 );
 
 }
 
-let dailyAmount=100;
+}
 
-globalData.money+=dailyAmount;
+let reward=
+Math.floor(
+Math.random()*4000
+)+1000;
 
-globalData.lastDaily=now;
+await Global.updateOne(
 
-await globalData.save();
+{user:userId},
 
-message.channel.send(
-`${message.author} nhận ${dailyAmount} micoin 💰`
+{
+
+$inc:{
+money:reward
+},
+
+$set:{
+dailyLast:now
+}
+
+}
+
 );
+
+const embed={
+
+title:"Daily reward",
+
+description:
+"You got "+
+reward+
+" coins",
+
+color:0xf592b3
+
+};
+
+message.channel.send({
+
+embeds:[embed]
+
+});
 
 }
 
