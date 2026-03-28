@@ -243,17 +243,23 @@ const shop={
 
 ring1:{
 name:"Silver Ring",
-price:5
+price:5,
+emoji:"💍",
+desc:"Nhẫn cơ bản để kết hôn"
 },
 
 ring2:{
 name:"Golden Ring",
-price:15
+price:15,
+emoji:"👑",
+desc:"Nhẫn vàng sang trọng"
 },
 
 ring3:{
 name:"Diamond Ring",
-price:50
+price:50,
+emoji:"💎",
+desc:"Nhẫn kim cương đắt tiền"
 }
 
 };
