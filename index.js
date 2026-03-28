@@ -1520,7 +1520,7 @@ embeds:[embed]
 
 });
 
-client.login(BOT_TOKEN);
+client.login(BOT_TOKEN).catch(console.error);
 
 process.on("unhandledRejection",err=>{
 console.log("Unhandled Rejection:",err);
