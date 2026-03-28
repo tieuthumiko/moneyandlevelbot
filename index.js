@@ -341,7 +341,7 @@ description:
 "💵 Cash: "+
 data.money+
 "\n🪙 Coin: "+
-data.coin,
+data.micash,
 
 color:0xf592b3
 
