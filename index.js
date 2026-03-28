@@ -11,6 +11,16 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
+const https=require("https");
+
+setInterval(()=>{
+
+https.get(
+"https://moneyandlevelbot.onrender.com"
+);
+
+},300000);
+
 const { Client, GatewayIntentBits, PermissionsBitField, EmbedBuilder } = require("discord.js");
 const mongoose = require("mongoose");
 
@@ -107,9 +117,9 @@ function getXP() { return Math.floor(Math.random() * 10) + 5; }
 function getMicoin() { return Math.floor(Math.random() * 20) + 5; }
 
 function getMoneyTier(amount) {
-    if (amount >= 5000) return "Platinum";
-    if (amount >= 1000) return "Gold";
-    if (amount >= 500) return "Silver";
+    if (amount >= 1000000000) return "Platinum";
+    if (amount >= 10000000) return "Gold";
+    if (amount >= 500000) return "Silver";
     return "Bronze";
 }
 
@@ -326,7 +336,7 @@ await getGlobal(
 user.id
 );
 
-if(!sender.inventory.includes(ring))
+if(!sender.inventory||!sender.inventory.includes(ring))
 return message.reply(
 "Bạn không có nhẫn"
 );
