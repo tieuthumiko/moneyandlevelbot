@@ -5,14 +5,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.status(200).send('Bot is running! :3');
+  res.status(200).send('miko is so cutee :33');
 });
 
-app.get("/ping",(req,res)=>{
-
-res.send("miko is so cute :33");
-
-});
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
