@@ -339,9 +339,9 @@ title:"Wallet",
 
 description:
 "💵 Cash: "+
-data.money+
+data.micash+
 "\n🪙 Coin: "+
-data.micash,
+data.money,
 
 color:0xf592b3
 
